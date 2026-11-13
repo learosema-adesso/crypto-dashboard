@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Providers } from './css/providers';
+import { InvokersPolyfill } from './invokers-polyfill';
 
 export const metadata: Metadata = {
   title: 'Crypto Dashboard',
@@ -11,6 +12,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="en">
       <body>
+        <InvokersPolyfill />
         <Providers>{children}</Providers>
       </body>
     </html>

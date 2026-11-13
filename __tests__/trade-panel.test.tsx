@@ -1,4 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 import {
   cleanup,
   fireEvent,
@@ -18,6 +26,25 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(search),
 }));
 vi.mock('../lib/market/queries');
+
+// jsdom has no dialog behaviour: showModal/close only toggle `open`
+beforeAll(async () => {
+  HTMLDialogElement.prototype.showModal = function () {
+    this.setAttribute('open', '');
+  };
+  HTMLDialogElement.prototype.close = function () {
+    this.removeAttribute('open');
+    this.dispatchEvent(new Event('close'));
+  };
+  // makes the command attributes work like in a browser without support
+  await import('invokers-polyfill');
+});
+
+function renderPanel() {
+  const result = render(<TradePanel />);
+  result.container.querySelector('dialog')?.showModal();
+  return result;
+}
 
 const priceState = (state: object) =>
   vi.mocked(usePrice).mockReturnValue(state as ReturnType<typeof usePrice>);
@@ -40,17 +67,89 @@ function trade(side: 'Buy' | 'Sell', qty: string) {
   fireEvent.click(screen.getByRole('button', { name: side }));
 }
 
+describe('TradePanel dialog', () => {
+  it('opens the form from the Trade button via command attributes', () => {
+    render(<TradePanel />);
+    const dialog = document.querySelector('dialog')!;
+    const open = screen.getByRole('button', { name: 'Trade' });
+
+    expect(open.getAttribute('command')).toBe('show-modal');
+    expect(open.getAttribute('commandfor')).toBe(dialog.id);
+    expect(dialog.hasAttribute('open')).toBe(false);
+
+    fireEvent.click(open);
+
+    expect(dialog.hasAttribute('open')).toBe(true);
+  });
+
+  it('closes via the close button', () => {
+    renderPanel();
+    const dialog = document.querySelector('dialog')!;
+    const close = screen.getByRole('button', { name: 'Close' });
+
+    expect(close.getAttribute('command')).toBe('close');
+    expect(close.getAttribute('commandfor')).toBe(dialog.id);
+
+    fireEvent.click(close);
+
+    expect(dialog.hasAttribute('open')).toBe(false);
+  });
+
+  it('is labelled by the heading', () => {
+    renderPanel();
+    const dialog = document.querySelector('dialog')!;
+    expect(dialog.getAttribute('aria-labelledby')).toBe('trade-heading');
+    expect(document.getElementById('trade-heading')).not.toBeNull();
+  });
+
+  it('closes after a valid trade', () => {
+    renderPanel();
+
+    trade('Buy', '1');
+
+    expect(document.querySelector('dialog')?.hasAttribute('open')).toBe(false);
+  });
+
+  it('stays open and shows the error after an invalid trade', () => {
+    renderPanel();
+
+    trade('Buy', '0');
+
+    expect(document.querySelector('dialog')?.hasAttribute('open')).toBe(true);
+    expect(screen.getByRole('alert')).toBeDefined();
+  });
+
+  it('forgets the error when the dialog is closed', () => {
+    renderPanel();
+    trade('Buy', '0');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    document.querySelector('dialog')!.showModal();
+
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
+  it('disables the Trade button while the price is unknown', () => {
+    priceState({ data: undefined, isPending: true, isError: false });
+    render(<TradePanel />);
+
+    expect(
+      screen.getByRole<HTMLButtonElement>('button', { name: 'Trade' }).disabled,
+    ).toBe(true);
+  });
+});
+
 describe('TradePanel', () => {
   it('shows the unit of the selected coin on the quantity field', () => {
     search = 'coin=ETHUSDT';
-    render(<TradePanel />);
+    renderPanel();
 
     expect(screen.getByText('ETH')).toBeDefined();
     expect(screen.getByText('USDT')).toBeDefined();
   });
 
   it('derives the amount from the quantity', () => {
-    render(<TradePanel />);
+    renderPanel();
 
     fireEvent.change(screen.getByLabelText('Quantity'), {
       target: { value: '2' },
@@ -62,7 +161,7 @@ describe('TradePanel', () => {
   });
 
   it('derives the quantity from the amount', () => {
-    render(<TradePanel />);
+    renderPanel();
 
     fireEvent.change(screen.getByLabelText('Amount'), {
       target: { value: '250' },
@@ -74,7 +173,7 @@ describe('TradePanel', () => {
   });
 
   it('buys the quantity derived from an amount', () => {
-    render(<TradePanel />);
+    renderPanel();
 
     fireEvent.change(screen.getByLabelText('Amount'), {
       target: { value: '300' },
@@ -87,7 +186,7 @@ describe('TradePanel', () => {
   });
 
   it('clears both fields after a trade', () => {
-    render(<TradePanel />);
+    renderPanel();
 
     trade('Buy', '2');
 
@@ -96,7 +195,7 @@ describe('TradePanel', () => {
   });
 
   it('clears the other field when one is emptied', () => {
-    render(<TradePanel />);
+    renderPanel();
     fireEvent.change(screen.getByLabelText('Quantity'), {
       target: { value: '2' },
     });
@@ -110,7 +209,7 @@ describe('TradePanel', () => {
 
   it('does not derive a value while the price is unknown', () => {
     priceState({ data: undefined, isPending: true, isError: false });
-    render(<TradePanel />);
+    renderPanel();
 
     fireEvent.change(screen.getByLabelText('Amount'), {
       target: { value: '100' },
@@ -120,7 +219,7 @@ describe('TradePanel', () => {
   });
 
   it('clears the error when the amount changes', () => {
-    render(<TradePanel />);
+    renderPanel();
     trade('Buy', '0');
     expect(screen.getByRole('alert')).toBeDefined();
 
@@ -133,7 +232,7 @@ describe('TradePanel', () => {
 
   it('shows the selected coin and its price', () => {
     search = 'coin=ETHUSDT';
-    render(<TradePanel />);
+    renderPanel();
 
     expect(
       screen.getByRole('heading', { name: 'Trade Ethereum (ETH)' }),
@@ -143,7 +242,7 @@ describe('TradePanel', () => {
   });
 
   it('buys at the current price and clears the input', () => {
-    render(<TradePanel />);
+    renderPanel();
 
     trade('Buy', '2');
 
@@ -158,7 +257,7 @@ describe('TradePanel', () => {
 
   it('trades the coin from the URL', () => {
     search = 'coin=ETHUSDT';
-    render(<TradePanel />);
+    renderPanel();
 
     trade('Buy', '1');
 
@@ -166,9 +265,11 @@ describe('TradePanel', () => {
   });
 
   it('sells what was bought', () => {
-    render(<TradePanel />);
+    renderPanel();
 
     trade('Buy', '3');
+    // a valid trade closes the dialog, so open it again
+    document.querySelector('dialog')!.showModal();
     trade('Sell', '1');
 
     const { cash, trades } = useTrading.getState();
@@ -177,7 +278,7 @@ describe('TradePanel', () => {
   });
 
   it('rejects a buy without enough cash', () => {
-    render(<TradePanel />);
+    renderPanel();
 
     trade('Buy', '101');
 
@@ -186,7 +287,7 @@ describe('TradePanel', () => {
   });
 
   it('rejects a sell without holdings', () => {
-    render(<TradePanel />);
+    renderPanel();
 
     trade('Sell', '1');
 
@@ -197,12 +298,12 @@ describe('TradePanel', () => {
   });
 
   it('only counts holdings of the selected coin', () => {
-    render(<TradePanel />);
+    renderPanel();
     trade('Buy', '1');
 
     cleanup();
     search = 'coin=ETHUSDT';
-    render(<TradePanel />);
+    renderPanel();
     trade('Sell', '1');
 
     expect(screen.getByRole('alert').textContent).toMatch(
@@ -212,7 +313,7 @@ describe('TradePanel', () => {
   });
 
   it.each([['0'], ['-1'], ['']])('rejects the quantity "%s"', (qty) => {
-    render(<TradePanel />);
+    renderPanel();
 
     trade('Buy', qty);
 
@@ -221,7 +322,7 @@ describe('TradePanel', () => {
   });
 
   it('clears the error when the quantity changes', () => {
-    render(<TradePanel />);
+    renderPanel();
     trade('Buy', '0');
     expect(screen.getByRole('alert')).toBeDefined();
 
@@ -234,7 +335,7 @@ describe('TradePanel', () => {
 
   it('disables trading while the price is loading', () => {
     priceState({ data: undefined, isPending: true, isError: false });
-    render(<TradePanel />);
+    renderPanel();
 
     expect(screen.getByText('Loading price…')).toBeDefined();
     expect(
@@ -247,7 +348,7 @@ describe('TradePanel', () => {
 
   it('disables trading and says so when the price failed to load', () => {
     priceState({ data: undefined, isPending: false, isError: true });
-    render(<TradePanel />);
+    renderPanel();
 
     expect(
       within(screen.getByRole('alert')).getByText(/could not load the price/i),

@@ -164,3 +164,39 @@ button {
   font-weight: 600;
   color: var(--color-accent);
 }
+
+/* Trade dialog: native modal, opened and closed with command attributes */
+.trade-open {
+  width: 100%;
+}
+
+dialog {
+  width: min(100% - 2rem, 28rem);
+  padding: var(--space-l);
+  color: var(--color-text);
+  background: var(--color-surface);
+  border: 0;
+  border-radius: var(--radius);
+}
+
+dialog::backdrop {
+  background: rgb(0 0 0 / 0.5);
+}
+
+.dialog-close {
+  display: block;
+  margin-inline-start: auto;
+  margin-block-end: var(--space-m);
+  padding: var(--space-xs) var(--space-s);
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--color-text);
+  background: transparent;
+  border-color: transparent;
+}
+
+.trade-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-m);
+}

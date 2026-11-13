@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { usePrice } from '../lib/market/queries';
 import { SYMBOLS } from '../lib/market/symbols';
 import { useSelectedSymbol } from '../lib/market/use-selected-symbol';
@@ -25,6 +25,7 @@ export function TradePanel() {
   const [qtyInput, setQtyInput] = useState('');
   const [amountInput, setAmountInput] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
 
   const coin = symbol.replace(/USDT$/, '');
   const name = SYMBOLS.find((s) => s.symbol === symbol)?.name ?? symbol;
@@ -49,6 +50,9 @@ export function TradePanel() {
     setQtyInput('');
     setAmountInput('');
     setError(null);
+    // opening is declarative (command attributes), closing after a valid
+    // trade depends on the validation result, so it needs this one call
+    dialogRef.current?.close();
   }
 
   function changeQty(value: string) {
@@ -75,43 +79,72 @@ export function TradePanel() {
       )}
       {price !== undefined && <p>Price: {price} USDT</p>}
 
-      <CurrencyInput
-        id="amount"
-        label="Amount"
-        unit="USDT"
-        value={amountInput}
-        onChange={changeAmount}
-      />
-      <CurrencyInput
-        id="qty"
-        label="Quantity"
-        unit={coin}
-        value={qtyInput}
-        onChange={changeQty}
-      />
+      <button
+        type="button"
+        className="trade-open"
+        command="show-modal"
+        commandfor="trade-dialog"
+        disabled={price === undefined}
+      >
+        Trade
+      </button>
 
-      {error && (
-        <p role="alert" className="alert">
-          {error}
-        </p>
-      )}
-
-      <div>
+      <dialog
+        id="trade-dialog"
+        ref={dialogRef}
+        aria-labelledby="trade-heading"
+        onClose={() => setError(null)}
+      >
         <button
           type="button"
-          disabled={price === undefined}
-          onClick={() => submit('buy')}
+          className="dialog-close"
+          command="close"
+          commandfor="trade-dialog"
+          aria-label="Close"
         >
-          Buy
-        </button>{' '}
-        <button
-          type="button"
-          disabled={price === undefined}
-          onClick={() => submit('sell')}
-        >
-          Sell
+          ×
         </button>
-      </div>
+
+        <div className="flow">
+          <CurrencyInput
+            id="amount"
+            label="Amount"
+            unit="USDT"
+            value={amountInput}
+            onChange={changeAmount}
+          />
+          <CurrencyInput
+            id="qty"
+            label="Quantity"
+            unit={coin}
+            value={qtyInput}
+            onChange={changeQty}
+          />
+
+          {error && (
+            <p role="alert" className="alert">
+              {error}
+            </p>
+          )}
+
+          <div className="trade-actions">
+            <button
+              type="button"
+              disabled={price === undefined}
+              onClick={() => submit('buy')}
+            >
+              Buy
+            </button>
+            <button
+              type="button"
+              disabled={price === undefined}
+              onClick={() => submit('sell')}
+            >
+              Sell
+            </button>
+          </div>
+        </div>
+      </dialog>
     </section>
   );
 }
