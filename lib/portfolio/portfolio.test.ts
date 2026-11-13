@@ -1,5 +1,36 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
+import { STARTING_CASH, useTrading } from '../trading/store';
+import { computeHoldings } from './holdings';
 import { computePortfolio } from './portfolio';
+
+describe('trades -> holdings -> portfolio', () => {
+  afterEach(() => {
+    useTrading.setState({ cash: STARTING_CASH, trades: [] });
+  });
+
+  it('gives the expected numbers for two buys and a partial sell', () => {
+    const { buy, sell } = useTrading.getState();
+    buy('BTCUSDT', 1, 100);
+    buy('BTCUSDT', 3, 200);
+    sell('BTCUSDT', 2, 300);
+
+    const { cash, trades } = useTrading.getState();
+    const portfolio = computePortfolio(computeHoldings(trades), {
+      BTCUSDT: 250,
+    });
+
+    // 10_000 - 100 - 600 + 600
+    expect(cash).toBe(9_900);
+    expect(portfolio.positions.BTCUSDT).toMatchObject({
+      qty: 2,
+      avgCost: 175,
+      value: 500,
+      cost: 350,
+      pl: 150,
+    });
+    expect(portfolio.totalPl).toBe(150);
+  });
+});
 
 describe('computePortfolio', () => {
   it('returns zero totals for no holdings', () => {

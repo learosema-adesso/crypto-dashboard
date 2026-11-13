@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { DEFAULT_SYMBOL, SYMBOLS } from '../lib/market/symbols';
+import { SYMBOLS } from '../lib/market/symbols';
+import { useSelectedSymbol } from '../lib/market/use-selected-symbol';
 import { PriceChart } from './price-chart';
 
 export function CoinChart() {
-  const [symbol, setSymbol] = useState<string>(DEFAULT_SYMBOL);
+  const [symbol, setSymbol] = useSelectedSymbol();
 
   return (
     <section className="card flow">
