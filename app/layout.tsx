@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { Providers } from './css/providers';
+import { Providers } from './providers';
 import { InvokersPolyfill } from './invokers-polyfill';
 
 export const metadata: Metadata = {

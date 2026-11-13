@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { onlineManager, useQuery } from '@tanstack/react-query';
 import { cleanup, render, screen } from '@testing-library/react';
-import { Providers } from '../app/css/providers';
+import { Providers } from '../app/providers';
 
 afterEach(() => {
   cleanup();
