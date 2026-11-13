@@ -71,3 +71,53 @@ desktop screens.
    • Use Git for version control, and ensure meaningful commit messages.
    • Write clean, modular, and reusable code.
    • Keep it as simple as the nature of this problem allows it. Do not over-engineer.
+
+---
+
+## Solution
+
+A client-side dashboard: 24h price chart with a coin autocomplete, a buy/sell dialog, and a portfolio with holdings, transaction history and profit/loss. Prices are polled every 10 seconds. There is no backend.
+
+### Running the tests
+
+```bash
+npm test             # watch mode
+npx vitest run       # single run
+npm run lint         # ESLint
+npm run format:check # Prettier
+```
+
+Tests live next to the code (`lib/**/*.test.ts`) and in `__tests__/` for components. They cover the pure portfolio math, response mapping with broken input, the trade validation and the components, including loading and error states.
+
+### Assumptions
+
+- **Starting balance:** 10,000 USDT (`STARTING_CASH` in `lib/trading/store.ts`).
+- **No fees** on trades.
+- **No short selling:** a buy needs enough cash, a sell needs enough holdings. Both are checked before a trade, and `computeHoldings` throws on an oversell.
+- **Currency:** everything is USDT, as delivered by Binance. Amounts are formatted in one place (`lib/format.ts`).
+- **Average cost:** a buy moves the average cost, a sell only reduces the quantity.
+- **Trades are not persisted:** a reload resets the portfolio to the starting balance.
+- **Theme:** starts with the system setting. The choice is not stored either.
+
+### Decisions
+
+- **Next.js (App Router):** the framework the setup defaults to, with routing and build included. The dashboard is all Client Components, so there is no server code of our own.
+- **TanStack Query for server state:** prices and klines get caching, polling (`refetchInterval: 10_000`, paused in background tabs) and loading/error states for free. One query per symbol.
+- **Zustand for client state:** only `cash` and `trades`. Small, no provider, no boilerplate. Two libraries with a clear split: what the server owns vs. what the user did.
+- **Derive, don't store:** holdings, average cost and P/L are pure functions of `trades` (`computeHoldings`, `computePortfolio`). One source of truth, and easy to test.
+- **`number` instead of a decimal library:** enough for a mock with Binance's 8 decimals. A small epsilon absorbs floating point residue when comparing against holdings.
+- **Polling, no WebSocket:** the task asks for periodic fetching and says not to over-engineer. A socket would add connection state, reconnects and a second data path for the same price.
+- **Plain CSS:** design tokens as CSS variables (light and dark via `light-dark()`), and an intrinsic `auto-grid` instead of media queries.
+- **Selected coin in the URL (`?coin=ETHUSDT`):** chart and trade panel read the same value, it survives a reload and is shareable.
+- **Native `<dialog>`** for the trade form, opened with the Invoker Commands API (`command`/`commandfor`) plus a polyfill for older browsers. Focus trap, Esc and backdrop come from the browser.
+- **Autocomplete from scratch:** a small ARIA combobox with keyboard support and a debounced filter, instead of a library.
+- **Lazy loaded chart:** Recharts is the largest dependency, so `PriceChart` loads in its own chunk via `next/dynamic`.
+
+More detail on the decisions is in [docs/architecture.md](docs/architecture.md).
+
+### With more time
+
+- WebSocket price stream (`@miniTicker`) writing into the query cache, with reconnect and backoff, polling only while the socket is closed
+- Persist trades (Zustand `persist` with `skipHydration`)
+- Decimal arithmetic instead of `number`
+- Currency switcher (EUR/CHF) via an exchange-rate query
