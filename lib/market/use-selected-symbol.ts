@@ -3,9 +3,9 @@
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { DEFAULT_SYMBOL, SYMBOLS } from './symbols';
 
-export const COIN_PARAM = 'coin';
+const COIN_PARAM = 'coin';
 
-export function parseSymbol(value: string | null): string {
+function parseSymbol(value: string | null): string {
   return SYMBOLS.find((s) => s.symbol === value)?.symbol ?? DEFAULT_SYMBOL;
 }
 

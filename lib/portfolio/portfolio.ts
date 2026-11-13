@@ -1,6 +1,6 @@
 import type { Holding } from './holdings';
 
-export type Position = Holding & {
+type Position = Holding & {
   price: number;
   value: number;
   cost: number;

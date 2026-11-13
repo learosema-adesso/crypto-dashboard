@@ -3,7 +3,7 @@
 import { useId, useState } from 'react';
 import { useDebounce } from '../lib/use-debounce';
 
-export type AutocompleteOption = { value: string; label: string };
+type AutocompleteOption = { value: string; label: string };
 
 type Props = {
   label: string;
