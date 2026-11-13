@@ -5,6 +5,9 @@ import Page from '../app/page';
 vi.mock('../app/coin-chart', () => ({
   CoinChart: () => <p>coin chart</p>,
 }));
+vi.mock('../app/portfolio-summary', () => ({
+  PortfolioSummary: () => <p>portfolio summary</p>,
+}));
 vi.mock('../app/theme-switcher', () => ({
   ThemeSwitcher: () => <p>theme switcher</p>,
 }));
@@ -23,4 +26,5 @@ test('Page places the dashboard cards in an auto-grid', () => {
   const grid = container.querySelector('.auto-grid');
   expect(grid).not.toBeNull();
   expect(grid?.textContent).toContain('coin chart');
+  expect(grid?.textContent).toContain('portfolio summary');
 });

@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import { CoinChart } from './coin-chart';
+import { PortfolioSummary } from './portfolio-summary';
 import { ThemeSwitcher } from './theme-switcher';
 
 export default function Home() {
@@ -14,6 +15,7 @@ export default function Home() {
         <Suspense fallback={<p className="muted span-all">Loading…</p>}>
           <CoinChart />
         </Suspense>
+        <PortfolioSummary />
       </div>
     </main>
   );
