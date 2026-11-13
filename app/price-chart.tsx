@@ -1,7 +1,14 @@
 'use client';
 
 import { useId } from 'react';
-import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
+import {
+  Area,
+  AreaChart,
+  ReferenceLine,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import { useKlines } from '../lib/market/queries';
 
 export function PriceChart({ symbol }: { symbol: string }) {
@@ -64,6 +71,18 @@ export function PriceChart({ symbol }: { symbol: string }) {
             width={80}
             axisLine={false}
             tickLine={false}
+          />
+          {/* close 24 h ago, the first point of the klines */}
+          <ReferenceLine
+            y={data[0].price}
+            stroke="var(--color-text-muted)"
+            strokeDasharray="2 4"
+            ifOverflow="extendDomain"
+            label={{
+              value: 'Prev close',
+              position: 'insideBottomLeft',
+              fill: 'var(--color-text-muted)',
+            }}
           />
           <Area
             dataKey="price"
