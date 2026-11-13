@@ -2,6 +2,7 @@
 
 import { SYMBOLS } from '../lib/market/symbols';
 import { useSelectedSymbol } from '../lib/market/use-selected-symbol';
+import { CoinHeader } from './coin-header';
 import { PriceChart } from './price-chart';
 
 export function CoinChart() {
@@ -23,6 +24,7 @@ export function CoinChart() {
           ))}
         </select>
       </div>
+      <CoinHeader symbol={symbol} />
       <PriceChart symbol={symbol} />
     </section>
   );

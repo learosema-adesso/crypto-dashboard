@@ -200,3 +200,26 @@ dialog::backdrop {
   grid-template-columns: 1fr 1fr;
   gap: var(--space-m);
 }
+
+/* Coin header: coin, price and P/L centered above the chart */
+.coin-header {
+  text-align: center;
+}
+
+.coin-header h2 {
+  font-size: 1.75rem;
+}
+
+.coin-price {
+  font-size: 2rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.positive {
+  color: var(--color-positive);
+}
+
+.negative {
+  color: var(--color-danger);
+}
