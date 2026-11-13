@@ -206,6 +206,15 @@ dialog::backdrop {
   text-align: center;
 }
 
+/* the browser's default top margins would open a big gap between the lines */
+.coin-header > * {
+  margin-block: 0;
+}
+
+.coin-header > * + * {
+  margin-block-start: var(--space-xs);
+}
+
 .coin-header h2 {
   font-size: 1.75rem;
 }

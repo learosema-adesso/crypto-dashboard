@@ -127,7 +127,7 @@ describe('PriceChart', () => {
     );
   });
 
-  it('marks the last price with a dot and a value label', async () => {
+  it('marks the last price with a dot and a tag', async () => {
     vi.mocked(fetchKlines).mockResolvedValue([
       { time: 1_700_000_000_000, price: 100 },
       { time: 1_700_000_900_000, price: 110 },
@@ -138,13 +138,24 @@ describe('PriceChart', () => {
 
     await screen.findByRole('img', { name: 'BTCUSDT price, last 24 hours' });
     expect(container.querySelector('.recharts-reference-dot')).not.toBeNull();
-    const labels = [...container.querySelectorAll('.recharts-label')].map(
-      (e) => e.textContent,
-    );
+    const tag = container.querySelector('.last-price-tag');
+    expect(tag?.querySelector('rect')).not.toBeNull();
     // not the first (100) and not the highest (110) price
-    expect(labels).toContain('105.00 USDT');
-    expect(labels).not.toContain('100.00 USDT');
-    expect(labels).not.toContain('110.00 USDT');
+    expect(tag?.textContent).toBe('105.00');
+  });
+
+  it('formats large prices with thousands separators in the tag', async () => {
+    vi.mocked(fetchKlines).mockResolvedValue([
+      { time: 1_700_000_000_000, price: 69_000 },
+      { time: 1_700_000_900_000, price: 69_820.123 },
+    ]);
+
+    const { container } = renderWithClient(<PriceChart symbol="BTCUSDT" />);
+
+    await screen.findByRole('img', { name: 'BTCUSDT price, last 24 hours' });
+    expect(container.querySelector('.last-price-tag')?.textContent).toBe(
+      '69,820.12',
+    );
   });
 
   it('moves the dot with the last price', async () => {

@@ -10,8 +10,48 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { formatUsdt } from '../lib/format';
 import { useKlines } from '../lib/market/queries';
+
+// Filled tag in the axis column, vertically centered on the last price.
+// Number only (the unit is in the header), so it fits the 80px axis.
+function LastPriceTag({
+  x = 0,
+  y = 0,
+  price,
+}: {
+  x?: number;
+  y?: number;
+  price: number;
+}) {
+  const width = 72;
+  const height = 22;
+  return (
+    <g className="last-price-tag">
+      <rect
+        x={x + 6}
+        y={y - height / 2}
+        width={width}
+        height={height}
+        rx={4}
+        fill="var(--color-chart-line)"
+      />
+      <text
+        x={x + 6 + width / 2}
+        y={y}
+        textAnchor="middle"
+        dominantBaseline="central"
+        fill="var(--color-surface)"
+        fontSize={12}
+        fontWeight={600}
+      >
+        {price.toLocaleString('en-US', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}
+      </text>
+    </g>
+  );
+}
 
 export function PriceChart({ symbol }: { symbol: string }) {
   const { data, isPending, isError, error, refetch } = useKlines(symbol);
@@ -96,11 +136,9 @@ export function PriceChart({ symbol }: { symbol: string }) {
             fill="var(--color-chart-line)"
             stroke="var(--color-surface)"
             ifOverflow="extendDomain"
-            label={{
-              value: formatUsdt(last.price),
-              position: 'right',
-              fill: 'var(--color-chart-line)',
-            }}
+            label={(props: { x?: number; y?: number }) => (
+              <LastPriceTag x={props.x} y={props.y} price={last.price} />
+            )}
           />
           <Area
             dataKey="price"
