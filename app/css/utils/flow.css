@@ -1,0 +1,8 @@
+/**
+ * Flow elements
+ *
+ * @see https://every-layout.dev/layouts/stack/
+ */
+.flow > * + * {
+  margin-block-start: var(--flow-space, 1rem);   
+}

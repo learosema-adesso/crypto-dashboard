@@ -1,0 +1,10 @@
+/**
+ * smol intrinsic container
+ * by Stephanie Eckles
+ *
+ * @see https://smolcss.dev
+ */
+.wrapper {
+  width: min(100% - 3rem, var(--container-max, 60ch));
+  margin-inline: auto;
+}
