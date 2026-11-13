@@ -8,7 +8,7 @@ export function CoinChart() {
   const [symbol, setSymbol] = useSelectedSymbol();
 
   return (
-    <section className="card flow">
+    <section className="card flow span-all">
       <div>
         <label htmlFor="coin">Coin </label>
         <select

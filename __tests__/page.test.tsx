@@ -17,3 +17,10 @@ test('Page', () => {
   expect(screen.getByText('theme switcher')).toBeDefined();
   expect(screen.getByText('coin chart')).toBeDefined();
 });
+
+test('Page places the dashboard cards in an auto-grid', () => {
+  const { container } = render(<Page />);
+  const grid = container.querySelector('.auto-grid');
+  expect(grid).not.toBeNull();
+  expect(grid?.textContent).toContain('coin chart');
+});

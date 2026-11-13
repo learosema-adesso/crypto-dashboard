@@ -9,10 +9,12 @@ export default function Home() {
         <h1>Crypto Dashboard</h1>
         <ThemeSwitcher />
       </header>
-      {/* useSearchParams in CoinChart needs a Suspense boundary */}
-      <Suspense fallback={<p className="muted">Loading…</p>}>
-        <CoinChart />
-      </Suspense>
+      <div className="auto-grid">
+        {/* useSearchParams in CoinChart needs a Suspense boundary */}
+        <Suspense fallback={<p className="muted span-all">Loading…</p>}>
+          <CoinChart />
+        </Suspense>
+      </div>
     </main>
   );
 }

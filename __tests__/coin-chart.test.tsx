@@ -36,6 +36,12 @@ describe('CoinChart', () => {
     expect(screen.getByText('chart BTCUSDT')).toBeDefined();
   });
 
+  it('spans the full row of the card grid', () => {
+    const { container } = render(<CoinChart />);
+
+    expect(container.querySelector('section')?.classList).toContain('span-all');
+  });
+
   it('shows the chart of the coin from the URL', () => {
     search = 'coin=ETHUSDT';
     render(<CoinChart />);
