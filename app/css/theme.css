@@ -1,7 +1,17 @@
 /**
  * Design tokens
  * Colors use light-dark(), which follows the color-scheme below.
+ * Without data-theme the system preference applies, the switcher
+ * sets data-theme="light|dark" on <html> to override it.
  */
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
 :root {
   color-scheme: dark light;
 
