@@ -3,7 +3,7 @@ import type { Trade } from '../trading/store';
 export type Holding = { qty: number; avgCost: number };
 
 // Tolerance for floating point residue, e.g. 0.1 + 0.2 - 0.3
-const EPSILON = 1e-12;
+export const EPSILON = 1e-12;
 
 // Derives holdings from the trade history (oldest first).
 // A buy moves the average cost, a sell only reduces qty (avgCost stays).

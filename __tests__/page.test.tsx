@@ -5,6 +5,9 @@ import Page from '../app/page';
 vi.mock('../app/coin-chart', () => ({
   CoinChart: () => <p>coin chart</p>,
 }));
+vi.mock('../app/trade-panel', () => ({
+  TradePanel: () => <p>trade panel</p>,
+}));
 vi.mock('../app/portfolio-summary', () => ({
   PortfolioSummary: () => <p>portfolio summary</p>,
 }));
@@ -32,7 +35,13 @@ test('Page places the dashboard cards in an auto-grid', () => {
   const grid = container.querySelector('.auto-grid');
   expect(grid).not.toBeNull();
   expect(grid?.textContent).toContain('coin chart');
+  expect(grid?.textContent).toContain('trade panel');
   expect(grid?.textContent).toContain('portfolio summary');
   expect(grid?.textContent).toContain('holdings table');
   expect(grid?.textContent).toContain('transaction history');
+});
+
+test('Page grid makes the cards without span-all halves', () => {
+  const { container } = render(<Page />);
+  expect(container.querySelector('.auto-grid')?.classList).toContain('halves');
 });
