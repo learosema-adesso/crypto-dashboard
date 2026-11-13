@@ -14,7 +14,10 @@ afterEach(() => {
 
 describe('fetchKlines', () => {
   it('requests 96 candles of 15 minutes (24 h)', async () => {
-    fetchMock.mockResolvedValue({ ok: true, json: async () => [] });
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => [[1, '1', '2', '0.5', '1.5']],
+    });
 
     await fetchKlines('BTCUSDT');
 
@@ -23,11 +26,13 @@ describe('fetchKlines', () => {
     );
   });
 
-  it('returns the unmodified payload', async () => {
+  it('returns mapped price points', async () => {
     const payload = [[1, '1', '2', '0.5', '1.5']];
     fetchMock.mockResolvedValue({ ok: true, json: async () => payload });
 
-    await expect(fetchKlines('BTCUSDT')).resolves.toBe(payload);
+    await expect(fetchKlines('BTCUSDT')).resolves.toEqual([
+      { time: 1, price: 1.5 },
+    ]);
   });
 
   it('throws on a non-ok response', async () => {
@@ -45,7 +50,10 @@ describe('fetchKlines', () => {
 
 describe('fetchPrice', () => {
   it('requests the ticker price for the symbol', async () => {
-    fetchMock.mockResolvedValue({ ok: true, json: async () => ({}) });
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({ symbol: 'ETHUSDT', price: '3000.00' }),
+    });
 
     await fetchPrice('ETHUSDT');
 
@@ -54,11 +62,11 @@ describe('fetchPrice', () => {
     );
   });
 
-  it('returns the unmodified payload', async () => {
+  it('returns the price as a number', async () => {
     const payload = { symbol: 'ETHUSDT', price: '3000.00' };
     fetchMock.mockResolvedValue({ ok: true, json: async () => payload });
 
-    await expect(fetchPrice('ETHUSDT')).resolves.toBe(payload);
+    await expect(fetchPrice('ETHUSDT')).resolves.toBe(3000);
   });
 
   it('throws on a non-ok response', async () => {

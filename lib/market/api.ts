@@ -1,3 +1,5 @@
+import { mapKlines, mapPrice, type PricePoint } from './mapping';
+
 const BASE = 'https://data-api.binance.vision/api/v3';
 
 async function getJson(
@@ -12,10 +14,12 @@ async function getJson(
 }
 
 // 96 × 15 min = 24 h
-export function fetchKlines(symbol: string): Promise<unknown> {
-  return getJson('klines', { symbol, interval: '15m', limit: '96' });
+export async function fetchKlines(symbol: string): Promise<PricePoint[]> {
+  return mapKlines(
+    await getJson('klines', { symbol, interval: '15m', limit: '96' }),
+  );
 }
 
-export function fetchPrice(symbol: string): Promise<unknown> {
-  return getJson('ticker/price', { symbol });
+export async function fetchPrice(symbol: string): Promise<number> {
+  return mapPrice(await getJson('ticker/price', { symbol }));
 }
