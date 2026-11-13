@@ -1,10 +1,13 @@
 'use client';
 
-import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
+import { useId } from 'react';
+import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 import { useKlines } from '../lib/market/queries';
 
 export function PriceChart({ symbol }: { symbol: string }) {
   const { data, isPending, isError, error, refetch } = useKlines(symbol);
+  // useId can contain characters that are not safe inside url(#...)
+  const gradientId = `price-fill-${useId().replace(/\W/g, '')}`;
 
   if (isPending) {
     return (
@@ -28,7 +31,21 @@ export function PriceChart({ symbol }: { symbol: string }) {
   return (
     <div role="img" aria-label={`${symbol} price, last 24 hours`}>
       <ResponsiveContainer width="100%" height={320}>
-        <LineChart data={data}>
+        <AreaChart data={data}>
+          <defs>
+            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+              <stop
+                offset="0%"
+                stopColor="var(--color-chart-line)"
+                stopOpacity={0.3}
+              />
+              <stop
+                offset="100%"
+                stopColor="var(--color-chart-line)"
+                stopOpacity={0}
+              />
+            </linearGradient>
+          </defs>
           <XAxis
             dataKey="time"
             type="number"
@@ -42,14 +59,15 @@ export function PriceChart({ symbol }: { symbol: string }) {
             }
           />
           <YAxis domain={['auto', 'auto']} width={80} />
-          <Line
+          <Area
             dataKey="price"
             dot={false}
             stroke="var(--color-chart-line)"
+            fill={`url(#${gradientId})`}
             isAnimationActive={false}
             type="monotone"
           />
-        </LineChart>
+        </AreaChart>
       </ResponsiveContainer>
     </div>
   );

@@ -37,7 +37,7 @@ afterEach(() => {
 });
 
 describe('PriceChart', () => {
-  it('renders a line for the klines', async () => {
+  it('renders a line with a gradient fill for the klines', async () => {
     vi.mocked(fetchKlines).mockResolvedValue([
       { time: 1_700_000_000_000, price: 100 },
       { time: 1_700_000_900_000, price: 110 },
@@ -50,7 +50,14 @@ describe('PriceChart', () => {
       await screen.findByRole('img', { name: 'BTCUSDT price, last 24 hours' }),
     ).toBeDefined();
     expect(fetchKlines).toHaveBeenCalledWith('BTCUSDT');
-    expect(container.querySelector('.recharts-line-curve')).not.toBeNull();
+    expect(container.querySelector('.recharts-area-curve')).not.toBeNull();
+
+    const gradient = container.querySelector('linearGradient');
+    expect(gradient?.id).toBeTruthy();
+    expect(gradient?.querySelectorAll('stop')).toHaveLength(2);
+    expect(
+      container.querySelector('.recharts-area-area')?.getAttribute('fill'),
+    ).toBe(`url(#${gradient?.id})`);
   });
 
   it('shows a loading state while fetching', () => {
@@ -90,7 +97,7 @@ describe('PriceChart', () => {
     ).toBeDefined();
     expect(fetchKlines).toHaveBeenCalledTimes(2);
     expect(screen.queryByRole('alert')).toBeNull();
-    expect(container.querySelector('.recharts-line-curve')).not.toBeNull();
+    expect(container.querySelector('.recharts-area-curve')).not.toBeNull();
   });
 
   it('shows the error again when the retry fails too', async () => {
