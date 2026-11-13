@@ -37,11 +37,21 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('CoinChart', () => {
-  it('starts with BTC and offers all coins', () => {
+  // Must stay the first test: next/dynamic caches the chunk after its first
+  // load, so later renders never show the fallback.
+  it('shows the loading state until the chart chunk has loaded', async () => {
+    render(<CoinChart />);
+
+    expect(screen.getByText('Loading chart…')).toBeDefined();
+    expect(await screen.findByText('chart BTCUSDT')).toBeDefined();
+    expect(screen.queryByText('Loading chart…')).toBeNull();
+  });
+
+  it('starts with BTC and offers all coins', async () => {
     render(<CoinChart />);
 
     expect(coinInput().value).toBe('Bitcoin (BTC)');
-    expect(screen.getByText('chart BTCUSDT')).toBeDefined();
+    expect(await screen.findByText('chart BTCUSDT')).toBeDefined();
 
     fireEvent.focus(coinInput());
     expect(screen.getAllByRole('option').map((o) => o.textContent)).toEqual(
@@ -55,33 +65,33 @@ describe('CoinChart', () => {
     expect(container.querySelector('section')?.classList).toContain('span-all');
   });
 
-  it('shows the chart of the coin from the URL', () => {
+  it('shows the chart of the coin from the URL', async () => {
     search = 'coin=ETHUSDT';
     render(<CoinChart />);
 
     expect(coinInput().value).toBe('Ethereum (ETH)');
-    expect(screen.getByText('chart ETHUSDT')).toBeDefined();
+    expect(await screen.findByText('chart ETHUSDT')).toBeDefined();
     expect(screen.queryByText('chart BTCUSDT')).toBeNull();
   });
 
-  it('shows the header of the selected coin above the chart', () => {
+  it('shows the header of the selected coin above the chart', async () => {
     search = 'coin=ETHUSDT';
     const { container } = render(<CoinChart />);
 
     const header = screen.getByText('header ETHUSDT');
-    const chart = screen.getByText('chart ETHUSDT');
+    const chart = await screen.findByText('chart ETHUSDT');
     expect(
       header.compareDocumentPosition(chart) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     expect(container.querySelector('section')?.contains(header)).toBe(true);
   });
 
-  it('falls back to BTC for an unknown coin in the URL', () => {
+  it('falls back to BTC for an unknown coin in the URL', async () => {
     search = 'coin=LTCUSDT';
     render(<CoinChart />);
 
     expect(coinInput().value).toBe('Bitcoin (BTC)');
-    expect(screen.getByText('chart BTCUSDT')).toBeDefined();
+    expect(await screen.findByText('chart BTCUSDT')).toBeDefined();
   });
 
   it('writes the selected coin into the URL', () => {
