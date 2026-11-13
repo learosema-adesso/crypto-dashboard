@@ -1,6 +1,0 @@
-/**
- * Lets a grid item take the full row of an .auto-grid
- */
-.auto-grid > .span-all {
-  grid-column: 1 / -1;
-}

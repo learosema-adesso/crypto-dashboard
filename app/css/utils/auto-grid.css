@@ -13,3 +13,23 @@
   in extra narrow spaces */
   grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--min)), 1fr));
 }
+
+/**
+ * Modifiers
+ */
+
+/* Lets a grid item take the full row */
+.auto-grid > .span-all {
+  grid-column: 1 / -1;
+}
+
+/**
+ * .halves: items without .span-all become halves.
+ * The min column width is too wide for three columns in the wrapper, so
+ * at most two fit per row. Narrow screens fall back to one column.
+ * A lone item without .span-all stays half width, so give a full-width
+ * row to .span-all.
+ */
+.auto-grid.halves {
+  --min: 30rem;
+}
