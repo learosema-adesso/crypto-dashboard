@@ -28,7 +28,7 @@ describe('useSelectedSymbol', () => {
     expect(result.current[0]).toBe('ETHUSDT');
   });
 
-  it.each([['DOGEUSDT'], ['ethusdt'], ['']])(
+  it.each([['LTCUSDT'], ['ethusdt'], ['']])(
     'falls back to the default symbol for the invalid param "%s"',
     (value) => {
       search = `coin=${value}`;
@@ -59,7 +59,7 @@ describe('useSelectedSymbol', () => {
   it('writes the default symbol when given an unknown one', () => {
     const { result } = renderHook(() => useSelectedSymbol());
 
-    act(() => result.current[1]('DOGEUSDT'));
+    act(() => result.current[1]('LTCUSDT'));
 
     expect(replace).toHaveBeenCalledWith('/?coin=BTCUSDT', { scroll: false });
   });

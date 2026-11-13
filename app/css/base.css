@@ -96,6 +96,64 @@ button {
   border-radius: var(--radius);
 }
 
+/* Autocomplete: grey field with underline like the currency input (Figma),
+   listbox as a surface card below it */
+.autocomplete {
+  position: relative;
+  max-width: 20rem;
+}
+
+.autocomplete > label {
+  display: block;
+  margin-block-end: var(--space-xs);
+  color: var(--color-text-muted);
+}
+
+.autocomplete input {
+  width: 100%;
+  padding: var(--space-s) var(--space-m);
+  font: inherit;
+  color: var(--color-text);
+  background: var(--color-surface-muted);
+  border: 0;
+  border-block-end: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.autocomplete input:focus-visible {
+  border-block-end-color: var(--color-accent);
+}
+
+.autocomplete [role='listbox'] {
+  position: absolute;
+  inset-inline: 0;
+  z-index: 1;
+  max-block-size: 16rem;
+  margin-block-start: var(--space-xs);
+  padding: var(--space-xs);
+  overflow-y: auto;
+  list-style: none;
+  background: var(--color-surface);
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 0.15);
+}
+
+.autocomplete [role='option'] {
+  padding: var(--space-s) var(--space-m);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.autocomplete [role='option'][data-active] {
+  background: var(--color-surface-muted);
+}
+
+.autocomplete [role='option'][aria-selected='true'] {
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
 button {
   cursor: pointer;
   background: var(--color-action);

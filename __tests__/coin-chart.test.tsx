@@ -1,6 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from '@testing-library/react';
 import { CoinChart } from '../app/coin-chart';
+import { SYMBOLS } from '../lib/market/symbols';
 
 const replace = vi.fn();
 let search = '';
@@ -19,6 +26,9 @@ vi.mock('../app/coin-header', () => ({
   CoinHeader: ({ symbol }: { symbol: string }) => <p>header {symbol}</p>,
 }));
 
+const coinInput = () =>
+  screen.getByRole<HTMLInputElement>('combobox', { name: 'Coin' });
+
 beforeEach(() => {
   replace.mockReset();
   search = '';
@@ -27,17 +37,16 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('CoinChart', () => {
-  it('offers BTC and ETH and starts with BTC', () => {
+  it('starts with BTC and offers all coins', () => {
     render(<CoinChart />);
 
-    const select = screen.getByRole<HTMLSelectElement>('combobox', {
-      name: 'Coin',
-    });
-    expect(select.value).toBe('BTCUSDT');
-    expect(
-      screen.getAllByRole('option').map((o) => (o as HTMLOptionElement).value),
-    ).toEqual(['BTCUSDT', 'ETHUSDT']);
+    expect(coinInput().value).toBe('Bitcoin (BTC)');
     expect(screen.getByText('chart BTCUSDT')).toBeDefined();
+
+    fireEvent.focus(coinInput());
+    expect(screen.getAllByRole('option').map((o) => o.textContent)).toEqual(
+      SYMBOLS.map((s) => s.name),
+    );
   });
 
   it('spans the full row of the card grid', () => {
@@ -50,9 +59,7 @@ describe('CoinChart', () => {
     search = 'coin=ETHUSDT';
     render(<CoinChart />);
 
-    expect(
-      screen.getByRole<HTMLSelectElement>('combobox', { name: 'Coin' }).value,
-    ).toBe('ETHUSDT');
+    expect(coinInput().value).toBe('Ethereum (ETH)');
     expect(screen.getByText('chart ETHUSDT')).toBeDefined();
     expect(screen.queryByText('chart BTCUSDT')).toBeNull();
   });
@@ -70,19 +77,37 @@ describe('CoinChart', () => {
   });
 
   it('falls back to BTC for an unknown coin in the URL', () => {
-    search = 'coin=DOGEUSDT';
+    search = 'coin=LTCUSDT';
     render(<CoinChart />);
 
+    expect(coinInput().value).toBe('Bitcoin (BTC)');
     expect(screen.getByText('chart BTCUSDT')).toBeDefined();
   });
 
   it('writes the selected coin into the URL', () => {
     render(<CoinChart />);
+    fireEvent.focus(coinInput());
 
-    fireEvent.change(screen.getByRole('combobox', { name: 'Coin' }), {
-      target: { value: 'ETHUSDT' },
-    });
+    fireEvent.click(screen.getByRole('option', { name: 'Ethereum (ETH)' }));
 
     expect(replace).toHaveBeenCalledWith('/?coin=ETHUSDT', { scroll: false });
+  });
+
+  it('selects a coin found by searching', () => {
+    vi.useFakeTimers();
+    try {
+      render(<CoinChart />);
+      fireEvent.focus(coinInput());
+
+      fireEvent.change(coinInput(), { target: { value: 'sol' } });
+      act(() => vi.advanceTimersByTime(300));
+      fireEvent.click(screen.getByRole('option'));
+
+      expect(replace).toHaveBeenCalledWith('/?coin=SOLUSDT', {
+        scroll: false,
+      });
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
