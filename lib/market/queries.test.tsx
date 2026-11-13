@@ -22,6 +22,10 @@ describe('priceQuery', () => {
     expect(priceQuery('BTCUSDT').queryKey).toEqual(['price', 'BTCUSDT']);
     expect(priceQuery('ETHUSDT').queryKey).toEqual(['price', 'ETHUSDT']);
   });
+
+  it('refetches every 10 seconds', () => {
+    expect(priceQuery('BTCUSDT').refetchInterval).toBe(10_000);
+  });
 });
 
 describe('klinesQuery', () => {
@@ -40,6 +44,23 @@ describe('usePrice', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toBe(65000);
     expect(fetchPrice).toHaveBeenCalledWith('BTCUSDT');
+  });
+
+  it('polls and picks up new prices', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      vi.mocked(fetchPrice).mockResolvedValueOnce(65000);
+      vi.mocked(fetchPrice).mockResolvedValueOnce(65100);
+
+      const { result } = renderHook(() => usePrice('BTCUSDT'), { wrapper });
+
+      await waitFor(() => expect(result.current.data).toBe(65000));
+      await vi.advanceTimersByTimeAsync(10_000);
+      await waitFor(() => expect(result.current.data).toBe(65100));
+      expect(fetchPrice).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('exposes the error when the fetch fails', async () => {

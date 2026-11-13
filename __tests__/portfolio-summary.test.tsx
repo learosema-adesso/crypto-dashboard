@@ -55,6 +55,26 @@ describe('PortfolioSummary', () => {
     expect(await screen.findByText('-40.00 USDT')).toBeDefined();
   });
 
+  it('refreshes value and P/L when the price is polled again', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      vi.mocked(fetchPrice).mockResolvedValueOnce(150);
+      vi.mocked(fetchPrice).mockResolvedValueOnce(80);
+      useTrading.getState().buy('BTCUSDT', 2, 100);
+      renderSummary();
+
+      expect(await screen.findByText('+100.00 USDT')).toBeDefined();
+
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      expect(await screen.findByText('-40.00 USDT')).toBeDefined();
+      expect(screen.getByText('160.00 USDT')).toBeDefined();
+      expect(fetchPrice).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('adds up several symbols', async () => {
     vi.mocked(fetchPrice).mockImplementation(async (symbol) =>
       symbol === 'BTCUSDT' ? 200 : 5,
