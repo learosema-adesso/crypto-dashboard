@@ -1,9 +1,11 @@
+import { MarketJson } from './market-json';
+
 export default function Home() {
   return (
     <>
       <main>
         <h1>Crypto Dashboard</h1>
-        <p>Hello World!</p>
+        <MarketJson symbol="BTCUSDT" />
       </main>
     </>
   );
