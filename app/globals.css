@@ -10,6 +10,7 @@
 
 @import './css/theme.css';
 @import './css/typography.css';
+@import './css/base.css';
 
 @import './css/utils/auto-grid.css';
 @import './css/utils/flow.css';

@@ -6,11 +6,17 @@ import { useKlines } from '../lib/market/queries';
 export function PriceChart({ symbol }: { symbol: string }) {
   const { data, isPending, isError, error, refetch } = useKlines(symbol);
 
-  if (isPending) return <p role="status">Loading chart…</p>;
+  if (isPending) {
+    return (
+      <p role="status" className="muted">
+        Loading chart…
+      </p>
+    );
+  }
 
   if (isError) {
     return (
-      <div role="alert">
+      <div role="alert" className="alert flow">
         <p>Could not load the chart: {error.message}</p>
         <button type="button" onClick={() => refetch()}>
           Retry
@@ -39,6 +45,7 @@ export function PriceChart({ symbol }: { symbol: string }) {
           <Line
             dataKey="price"
             dot={false}
+            stroke="var(--color-chart-line)"
             isAnimationActive={false}
             type="monotone"
           />

@@ -1,3 +1,32 @@
-html {
+/**
+ * Design tokens
+ * Colors use light-dark(), which follows the color-scheme below.
+ */
+:root {
   color-scheme: dark light;
+
+  /* Colors */
+  --color-bg: light-dark(#f6f7f9, #0e1116);
+  --color-surface: light-dark(#ffffff, #171b22);
+  --color-text: light-dark(#14171c, #e8eaed);
+  --color-text-muted: light-dark(#5b6472, #9aa3b0);
+  --color-border: light-dark(#d9dde3, #2a303a);
+  --color-accent: light-dark(#1f6feb, #58a6ff);
+  --color-accent-contrast: light-dark(#ffffff, #0e1116);
+  --color-danger: light-dark(#c62828, #ff8a80);
+  --color-chart-line: var(--color-accent);
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-s: 0.5rem;
+  --space-m: 1rem;
+  --space-l: 1.5rem;
+  --space-xl: 2.5rem;
+
+  /* Shape */
+  --radius: 0.5rem;
+  --border: 1px solid var(--color-border);
+
+  /* Layout, read by .wrapper */
+  --container-max: 72rem;
 }

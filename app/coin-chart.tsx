@@ -8,19 +8,21 @@ export function CoinChart() {
   const [symbol, setSymbol] = useState<string>(DEFAULT_SYMBOL);
 
   return (
-    <section>
-      <label htmlFor="coin">Coin </label>
-      <select
-        id="coin"
-        value={symbol}
-        onChange={(e) => setSymbol(e.target.value)}
-      >
-        {SYMBOLS.map((s) => (
-          <option key={s.symbol} value={s.symbol}>
-            {s.name}
-          </option>
-        ))}
-      </select>
+    <section className="card flow">
+      <div>
+        <label htmlFor="coin">Coin </label>
+        <select
+          id="coin"
+          value={symbol}
+          onChange={(e) => setSymbol(e.target.value)}
+        >
+          {SYMBOLS.map((s) => (
+            <option key={s.symbol} value={s.symbol}>
+              {s.name}
+            </option>
+          ))}
+        </select>
+      </div>
       <PriceChart symbol={symbol} />
     </section>
   );
