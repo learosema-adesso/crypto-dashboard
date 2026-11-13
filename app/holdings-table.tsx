@@ -22,30 +22,42 @@ export function HoldingsTable() {
       )}
 
       {positions.length > 0 && (
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Coin</th>
-              <th scope="col">Quantity</th>
-              <th scope="col">Avg. cost</th>
-              <th scope="col">Price</th>
-              <th scope="col">Value</th>
-              <th scope="col">P/L</th>
-            </tr>
-          </thead>
-          <tbody>
-            {positions.map(([symbol, p]) => (
-              <tr key={symbol}>
-                <th scope="row">{symbol}</th>
-                <td>{formatQty(p.qty)}</td>
-                <td>{formatUsdt(p.avgCost)}</td>
-                <td>{formatUsdt(p.price)}</td>
-                <td>{formatUsdt(p.value)}</td>
-                <td>{formatUsdt(p.pl, { signed: true })}</td>
+        <div className="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Coin</th>
+                <th scope="col" className="num">
+                  Quantity
+                </th>
+                <th scope="col" className="num">
+                  Avg. cost
+                </th>
+                <th scope="col" className="num">
+                  Price
+                </th>
+                <th scope="col" className="num">
+                  Value
+                </th>
+                <th scope="col" className="num">
+                  P/L
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {positions.map(([symbol, p]) => (
+                <tr key={symbol}>
+                  <th scope="row">{symbol}</th>
+                  <td className="num">{formatQty(p.qty)}</td>
+                  <td className="num">{formatUsdt(p.avgCost)}</td>
+                  <td className="num">{formatUsdt(p.price)}</td>
+                  <td className="num">{formatUsdt(p.value)}</td>
+                  <td className="num">{formatUsdt(p.pl, { signed: true })}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </section>
   );

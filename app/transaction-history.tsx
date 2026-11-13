@@ -15,34 +15,42 @@ export function TransactionHistory() {
       {rows.length === 0 ? (
         <p className="muted">No transactions yet.</p>
       ) : (
-        <table>
-          <thead>
-            <tr>
-              <th scope="col">Time</th>
-              <th scope="col">Coin</th>
-              <th scope="col">Side</th>
-              <th scope="col">Quantity</th>
-              <th scope="col">Price</th>
-              <th scope="col">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((t) => (
-              <tr key={t.id}>
-                <td>
-                  <time dateTime={new Date(t.ts).toISOString()}>
-                    {new Date(t.ts).toLocaleString()}
-                  </time>
-                </td>
-                <th scope="row">{t.symbol}</th>
-                <td>{t.side === 'buy' ? 'Buy' : 'Sell'}</td>
-                <td>{formatQty(t.qty)}</td>
-                <td>{formatUsdt(t.price)}</td>
-                <td>{formatUsdt(t.qty * t.price)}</td>
+        <div className="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Time</th>
+                <th scope="col">Coin</th>
+                <th scope="col">Side</th>
+                <th scope="col" className="num">
+                  Quantity
+                </th>
+                <th scope="col" className="num">
+                  Price
+                </th>
+                <th scope="col" className="num">
+                  Total
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rows.map((t) => (
+                <tr key={t.id}>
+                  <td>
+                    <time dateTime={new Date(t.ts).toISOString()}>
+                      {new Date(t.ts).toLocaleString()}
+                    </time>
+                  </td>
+                  <th scope="row">{t.symbol}</th>
+                  <td>{t.side === 'buy' ? 'Buy' : 'Sell'}</td>
+                  <td className="num">{formatQty(t.qty)}</td>
+                  <td className="num">{formatUsdt(t.price)}</td>
+                  <td className="num">{formatUsdt(t.qty * t.price)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </section>
   );

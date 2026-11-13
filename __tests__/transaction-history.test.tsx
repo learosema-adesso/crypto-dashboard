@@ -36,6 +36,19 @@ describe('TransactionHistory', () => {
     );
   });
 
+  it('wraps the table in a scroll container and marks number columns', () => {
+    useTrading.getState().buy('BTCUSDT', 1, 100);
+    const { container } = render(<TransactionHistory />);
+
+    expect(container.querySelector('.table-scroll > table')).not.toBeNull();
+    expect(
+      screen
+        .getAllByRole('columnheader')
+        .filter((h) => h.classList.contains('num'))
+        .map((h) => h.textContent),
+    ).toEqual(['Quantity', 'Price', 'Total']);
+  });
+
   it('shows the newest trade first', () => {
     const { buy, sell } = useTrading.getState();
     buy('BTCUSDT', 1, 100);

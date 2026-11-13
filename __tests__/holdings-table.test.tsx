@@ -51,6 +51,27 @@ describe('HoldingsTable', () => {
     ]);
   });
 
+  it('wraps the table in a scroll container and marks number columns', async () => {
+    vi.mocked(fetchPrice).mockResolvedValue(250);
+    useTrading.getState().buy('BTCUSDT', 1, 100);
+    const { container } = renderTable();
+
+    await screen.findByRole('table');
+
+    expect(container.querySelector('.table-scroll > table')).not.toBeNull();
+    expect(
+      screen
+        .getAllByRole('columnheader')
+        .filter((h) => h.classList.contains('num'))
+        .map((h) => h.textContent),
+    ).toEqual(['Quantity', 'Avg. cost', 'Price', 'Value', 'P/L']);
+    expect(
+      within(screen.getByRole('row', { name: /BTCUSDT/ }))
+        .getAllByRole('cell')
+        .every((c) => c.classList.contains('num')),
+    ).toBe(true);
+  });
+
   it('shows a negative P/L when the price fell', async () => {
     vi.mocked(fetchPrice).mockResolvedValue(80);
     useTrading.getState().buy('BTCUSDT', 2, 100);

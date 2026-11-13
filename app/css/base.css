@@ -53,6 +53,40 @@ dl > :nth-last-child(-n + 2) {
   border-block-end: 0;
 }
 
+/* Tables: set off header, thin row dividers, numbers right-aligned.
+   Wrap in .table-scroll so narrow screens scroll the table, not the page. */
+.table-scroll {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: var(--space-s) var(--space-m);
+  text-align: start;
+  white-space: nowrap;
+  border-block-end: var(--border);
+}
+
+thead th {
+  color: var(--color-text-muted);
+  font-weight: 600;
+  border-block-end-width: 2px;
+}
+
+tbody tr:last-child > * {
+  border-block-end: 0;
+}
+
+.num {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+
 select,
 button {
   padding: var(--space-s) var(--space-m);
