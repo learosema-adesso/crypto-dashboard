@@ -121,3 +121,27 @@ More detail on the decisions is in [docs/architecture.md](docs/architecture.md).
 - Persist trades (Zustand `persist` with `skipHydration`)
 - Decimal arithmetic instead of `number`
 - Currency switcher (EUR/CHF) via an exchange-rate query
+
+## Why I used AI in the project
+
+- The time frame of 4 hours was already very short. With AI assistance I could cover the whole scope (data layer, trading logic, chart, accessibility, tests, docs) instead of only a slice of it.
+- Much of the work is well-understood and repetitive: response mapping, store actions, tests, table markup. A model is fast at that, and I could spend my time on the decisions.
+- Every step is a small, reviewable commit. I read and steered the result, and the commits carry a `Co-Authored-By` trailer so the split stays visible in the history.
+
+### What I (Lea) contributed
+
+- **The initial architecture decisions:** the stack and the split between server state and client state (see [Decisions](#decisions) and [docs/architecture.md](docs/architecture.md)).
+- **The repository setup:** tooling, formatting, pre-commit hook, test setup and the working rules for the project (`CLAUDE.md`).
+- **The design decision to use native web standards wherever possible:**
+  - the `<dialog>` element and the Invoker Commands API (`command`/`commandfor`) for the trade form
+  - plain, native CSS instead of a styling framework
+  - established building blocks instead of custom ones: a well-tested CSS reset and layout utility classes
+- **Direction and review:** deciding what to build next, and accepting or rejecting what the model produced.
+
+### What the model did
+
+- Implemented the features within those decisions: market fetching and validation, the Zustand store, portfolio math, the chart, the coin search, the trade form and the tables.
+- Wrote the tests and the documentation text.
+- Did the refactorings and fixes that came up along the way, one commit at a time.
+
+I take responsibility for the result. The choices above are mine, the typing was mostly not.
