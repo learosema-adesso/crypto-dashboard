@@ -127,6 +127,54 @@ describe('PriceChart', () => {
     );
   });
 
+  it('marks the last price with a dot and a value label', async () => {
+    vi.mocked(fetchKlines).mockResolvedValue([
+      { time: 1_700_000_000_000, price: 100 },
+      { time: 1_700_000_900_000, price: 110 },
+      { time: 1_700_001_800_000, price: 105 },
+    ]);
+
+    const { container } = renderWithClient(<PriceChart symbol="BTCUSDT" />);
+
+    await screen.findByRole('img', { name: 'BTCUSDT price, last 24 hours' });
+    expect(container.querySelector('.recharts-reference-dot')).not.toBeNull();
+    const labels = [...container.querySelectorAll('.recharts-label')].map(
+      (e) => e.textContent,
+    );
+    // not the first (100) and not the highest (110) price
+    expect(labels).toContain('105.00 USDT');
+    expect(labels).not.toContain('100.00 USDT');
+    expect(labels).not.toContain('110.00 USDT');
+  });
+
+  it('moves the dot with the last price', async () => {
+    const dotY = async (prices: number[]) => {
+      vi.mocked(fetchKlines).mockResolvedValue(
+        prices.map((price, i) => ({
+          time: 1_700_000_000_000 + i * 900_000,
+          price,
+        })),
+      );
+      const { container, unmount } = renderWithClient(
+        <PriceChart symbol="BTCUSDT" />,
+      );
+      await screen.findByRole('img', { name: 'BTCUSDT price, last 24 hours' });
+      const dot = container.querySelector('.recharts-reference-dot-dot');
+      const attrs = [dot?.getAttribute('cx'), dot?.getAttribute('cy')];
+      unmount();
+      return attrs;
+    };
+
+    // same first price, different last price: the dot moves
+    expect(await dotY([100, 120, 110])).not.toEqual(
+      await dotY([100, 120, 130]),
+    );
+    // the dot sits at the right end for any series
+    expect((await dotY([100, 120, 110]))[0]).toBe(
+      (await dotY([100, 120, 130]))[0],
+    );
+  });
+
   it('shows a loading state while fetching', () => {
     vi.mocked(fetchKlines).mockReturnValue(new Promise(() => {}));
 

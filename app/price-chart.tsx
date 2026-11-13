@@ -4,11 +4,13 @@ import { useId } from 'react';
 import {
   Area,
   AreaChart,
+  ReferenceDot,
   ReferenceLine,
   ResponsiveContainer,
   XAxis,
   YAxis,
 } from 'recharts';
+import { formatUsdt } from '../lib/format';
 import { useKlines } from '../lib/market/queries';
 
 export function PriceChart({ symbol }: { symbol: string }) {
@@ -34,6 +36,8 @@ export function PriceChart({ symbol }: { symbol: string }) {
       </div>
     );
   }
+
+  const last = data[data.length - 1];
 
   return (
     <div role="img" aria-label={`${symbol} price, last 24 hours`}>
@@ -82,6 +86,20 @@ export function PriceChart({ symbol }: { symbol: string }) {
               value: 'Prev close',
               position: 'insideBottomLeft',
               fill: 'var(--color-text-muted)',
+            }}
+          />
+          {/* latest price: dot at the end of the line, value at the right edge */}
+          <ReferenceDot
+            x={last.time}
+            y={last.price}
+            r={4}
+            fill="var(--color-chart-line)"
+            stroke="var(--color-surface)"
+            ifOverflow="extendDomain"
+            label={{
+              value: formatUsdt(last.price),
+              position: 'right',
+              fill: 'var(--color-chart-line)',
             }}
           />
           <Area
