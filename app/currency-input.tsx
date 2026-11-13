@@ -24,10 +24,12 @@ export function CurrencyInput({
           inputMode="decimal"
           min="0"
           step="any"
+          aria-describedby={`${id}-unit`}
           value={value}
           onChange={(e) => onChange(e.target.value)}
         />
-        <span className="currency-input-unit" aria-hidden="true">
+        {/* read as the input's description, so the currency is announced */}
+        <span id={`${id}-unit`} className="currency-input-unit">
           {unit}
         </span>
       </div>

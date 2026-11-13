@@ -26,6 +26,15 @@ describe('CurrencyInput', () => {
     expect(input.min).toBe('0');
   });
 
+  it('announces the unit as the description of the input', () => {
+    setup();
+    const input = screen.getByLabelText('Amount');
+    expect(input.getAttribute('aria-describedby')).toBe('amount-unit');
+    expect(document.getElementById('amount-unit')?.textContent).toBe('USDT');
+    expect(input.getAttribute('aria-describedby')).toBeTruthy();
+    expect(screen.getByRole('spinbutton', { description: 'USDT' })).toBe(input);
+  });
+
   it('shows the value and the unit', () => {
     setup('12.5');
     expect(screen.getByLabelText<HTMLInputElement>('Amount').value).toBe(
