@@ -16,15 +16,19 @@
   color-scheme: dark light;
 
   /* Colors */
-  --color-bg: light-dark(#f6f7f9, #0e1116);
-  --color-surface: light-dark(#ffffff, #171b22);
-  --color-text: light-dark(#14171c, #e8eaed);
-  --color-text-muted: light-dark(#5b6472, #9aa3b0);
-  --color-border: light-dark(#d9dde3, #2a303a);
-  --color-accent: light-dark(#1f6feb, #58a6ff);
-  --color-accent-contrast: light-dark(#ffffff, #0e1116);
+  --color-bg: light-dark(#daf1f4, #0b1a20);
+  --color-surface: light-dark(#ffffff, #13262e);
+  --color-surface-muted: light-dark(#f3f3f3, #1a2f38);
+  --color-text: light-dark(#1d2327, #e8eef0);
+  --color-text-muted: light-dark(#566268, #9db0b8);
+  --color-border: light-dark(#c5dde1, #26404a);
+  --color-accent: light-dark(#009bb8, #4cc9de);
+  --color-accent-contrast: light-dark(#ffffff, #0b1a20);
+  --color-action: light-dark(#153245, #4cc9de);
+  --color-action-contrast: light-dark(#ffffff, #0b1a20);
+  --color-positive: light-dark(#00902a, #5fd47f);
   --color-danger: light-dark(#c62828, #ff8a80);
-  --color-chart-line: var(--color-accent);
+  --color-chart-line: light-dark(#1b7f80, #4cc9de);
 
   /* Spacing */
   --space-xs: 0.25rem;
