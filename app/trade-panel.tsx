@@ -6,7 +6,9 @@ import { SYMBOLS } from '../lib/market/symbols';
 import { useSelectedSymbol } from '../lib/market/use-selected-symbol';
 import { computeHoldings } from '../lib/portfolio/holdings';
 import { useTrading } from '../lib/trading/store';
+import { amountToQty, qtyToAmount } from '../lib/trading/convert';
 import { validateTrade } from '../lib/trading/validate';
+import { CurrencyInput } from './currency-input';
 
 export function TradePanel() {
   const [symbol] = useSelectedSymbol();
@@ -19,9 +21,12 @@ export function TradePanel() {
   // derived outside the selector, otherwise it returns a new object every time
   const holdings = useMemo(() => computeHoldings(trades), [trades]);
 
+  // both fields describe the same trade, editing one rewrites the other
   const [qtyInput, setQtyInput] = useState('');
+  const [amountInput, setAmountInput] = useState('');
   const [error, setError] = useState<string | null>(null);
 
+  const coin = symbol.replace(/USDT$/, '');
   const name = SYMBOLS.find((s) => s.symbol === symbol)?.name ?? symbol;
 
   function submit(side: 'buy' | 'sell') {
@@ -42,6 +47,19 @@ export function TradePanel() {
 
     (side === 'buy' ? buy : sell)(symbol, qty, price);
     setQtyInput('');
+    setAmountInput('');
+    setError(null);
+  }
+
+  function changeQty(value: string) {
+    setQtyInput(value);
+    setAmountInput(price === undefined ? '' : qtyToAmount(value, price));
+    setError(null);
+  }
+
+  function changeAmount(value: string) {
+    setAmountInput(value);
+    setQtyInput(price === undefined ? '' : amountToQty(value, price));
     setError(null);
   }
 
@@ -57,21 +75,20 @@ export function TradePanel() {
       )}
       {price !== undefined && <p>Price: {price} USDT</p>}
 
-      <div>
-        <label htmlFor="qty">Quantity </label>
-        <input
-          id="qty"
-          type="number"
-          inputMode="decimal"
-          min="0"
-          step="any"
-          value={qtyInput}
-          onChange={(e) => {
-            setQtyInput(e.target.value);
-            setError(null);
-          }}
-        />
-      </div>
+      <CurrencyInput
+        id="amount"
+        label="Amount"
+        unit="USDT"
+        value={amountInput}
+        onChange={changeAmount}
+      />
+      <CurrencyInput
+        id="qty"
+        label="Quantity"
+        unit={coin}
+        value={qtyInput}
+        onChange={changeQty}
+      />
 
       {error && (
         <p role="alert" className="alert">

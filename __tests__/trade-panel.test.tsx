@@ -41,6 +41,96 @@ function trade(side: 'Buy' | 'Sell', qty: string) {
 }
 
 describe('TradePanel', () => {
+  it('shows the unit of the selected coin on the quantity field', () => {
+    search = 'coin=ETHUSDT';
+    render(<TradePanel />);
+
+    expect(screen.getByText('ETH')).toBeDefined();
+    expect(screen.getByText('USDT')).toBeDefined();
+  });
+
+  it('derives the amount from the quantity', () => {
+    render(<TradePanel />);
+
+    fireEvent.change(screen.getByLabelText('Quantity'), {
+      target: { value: '2' },
+    });
+
+    expect(screen.getByLabelText<HTMLInputElement>('Amount').value).toBe(
+      '200.00',
+    );
+  });
+
+  it('derives the quantity from the amount', () => {
+    render(<TradePanel />);
+
+    fireEvent.change(screen.getByLabelText('Amount'), {
+      target: { value: '250' },
+    });
+
+    expect(screen.getByLabelText<HTMLInputElement>('Quantity').value).toBe(
+      '2.5',
+    );
+  });
+
+  it('buys the quantity derived from an amount', () => {
+    render(<TradePanel />);
+
+    fireEvent.change(screen.getByLabelText('Amount'), {
+      target: { value: '300' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Buy' }));
+
+    expect(useTrading.getState().trades).toMatchObject([
+      { side: 'buy', qty: 3, price: 100 },
+    ]);
+  });
+
+  it('clears both fields after a trade', () => {
+    render(<TradePanel />);
+
+    trade('Buy', '2');
+
+    expect(screen.getByLabelText<HTMLInputElement>('Amount').value).toBe('');
+    expect(screen.getByLabelText<HTMLInputElement>('Quantity').value).toBe('');
+  });
+
+  it('clears the other field when one is emptied', () => {
+    render(<TradePanel />);
+    fireEvent.change(screen.getByLabelText('Quantity'), {
+      target: { value: '2' },
+    });
+
+    fireEvent.change(screen.getByLabelText('Quantity'), {
+      target: { value: '' },
+    });
+
+    expect(screen.getByLabelText<HTMLInputElement>('Amount').value).toBe('');
+  });
+
+  it('does not derive a value while the price is unknown', () => {
+    priceState({ data: undefined, isPending: true, isError: false });
+    render(<TradePanel />);
+
+    fireEvent.change(screen.getByLabelText('Amount'), {
+      target: { value: '100' },
+    });
+
+    expect(screen.getByLabelText<HTMLInputElement>('Quantity').value).toBe('');
+  });
+
+  it('clears the error when the amount changes', () => {
+    render(<TradePanel />);
+    trade('Buy', '0');
+    expect(screen.getByRole('alert')).toBeDefined();
+
+    fireEvent.change(screen.getByLabelText('Amount'), {
+      target: { value: '100' },
+    });
+
+    expect(screen.queryByRole('alert')).toBeNull();
+  });
+
   it('shows the selected coin and its price', () => {
     search = 'coin=ETHUSDT';
     render(<TradePanel />);
