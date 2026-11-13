@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { fetchKlines } from '../lib/market/api';
 import { PriceChart } from '../app/price-chart';
 
@@ -53,20 +53,58 @@ describe('PriceChart', () => {
     expect(container.querySelector('.recharts-line-curve')).not.toBeNull();
   });
 
-  it('renders nothing while loading', () => {
+  it('shows a loading state while fetching', () => {
     vi.mocked(fetchKlines).mockReturnValue(new Promise(() => {}));
 
     const { container } = renderWithClient(<PriceChart symbol="BTCUSDT" />);
 
+    expect(screen.getByRole('status').textContent).toBe('Loading chart…');
     expect(container.querySelector('.recharts-wrapper')).toBeNull();
   });
 
-  it('renders nothing when the request fails', async () => {
+  it('shows the error with a retry button when the request fails', async () => {
     vi.mocked(fetchKlines).mockRejectedValue(new Error('klines down'));
 
     const { container } = renderWithClient(<PriceChart symbol="BTCUSDT" />);
 
-    await vi.waitFor(() => expect(fetchKlines).toHaveBeenCalled());
+    const alert = await screen.findByRole('alert');
+    expect(alert.textContent).toContain('klines down');
+    expect(screen.getByRole('button', { name: 'Retry' })).toBeDefined();
     expect(container.querySelector('.recharts-wrapper')).toBeNull();
+  });
+
+  it('refetches and shows the chart after a retry', async () => {
+    vi.mocked(fetchKlines)
+      .mockRejectedValueOnce(new Error('klines down'))
+      .mockResolvedValueOnce([
+        { time: 1_700_000_000_000, price: 100 },
+        { time: 1_700_000_900_000, price: 110 },
+      ]);
+
+    const { container } = renderWithClient(<PriceChart symbol="BTCUSDT" />);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Retry' }));
+
+    expect(
+      await screen.findByRole('img', { name: 'BTCUSDT price, last 24 hours' }),
+    ).toBeDefined();
+    expect(fetchKlines).toHaveBeenCalledTimes(2);
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(container.querySelector('.recharts-line-curve')).not.toBeNull();
+  });
+
+  it('shows the error again when the retry fails too', async () => {
+    vi.mocked(fetchKlines)
+      .mockRejectedValueOnce(new Error('first failure'))
+      .mockRejectedValueOnce(new Error('second failure'));
+
+    renderWithClient(<PriceChart symbol="BTCUSDT" />);
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Retry' }));
+
+    expect((await screen.findByRole('alert')).textContent).toContain(
+      'second failure',
+    );
+    expect(fetchKlines).toHaveBeenCalledTimes(2);
   });
 });

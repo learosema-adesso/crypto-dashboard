@@ -4,9 +4,20 @@ import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
 import { useKlines } from '../lib/market/queries';
 
 export function PriceChart({ symbol }: { symbol: string }) {
-  const { data } = useKlines(symbol);
+  const { data, isPending, isError, error, refetch } = useKlines(symbol);
 
-  if (!data) return null;
+  if (isPending) return <p role="status">Loading chart…</p>;
+
+  if (isError) {
+    return (
+      <div role="alert">
+        <p>Could not load the chart: {error.message}</p>
+        <button type="button" onClick={() => refetch()}>
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div role="img" aria-label={`${symbol} price, last 24 hours`}>
