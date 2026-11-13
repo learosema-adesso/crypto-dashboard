@@ -139,6 +139,69 @@ describe('TradePanel dialog', () => {
   });
 });
 
+describe('TradePanel live region', () => {
+  it('is an empty polite status region outside the dialog before a trade', () => {
+    renderPanel();
+    const status = screen.getByRole('status');
+
+    expect(status.getAttribute('aria-live')).toBe('polite');
+    expect(status.textContent).toBe('');
+    expect(document.querySelector('dialog')?.contains(status)).toBe(false);
+  });
+
+  it('announces a buy', () => {
+    renderPanel();
+
+    trade('Buy', '2');
+
+    expect(screen.getByRole('status').textContent).toBe(
+      'Bought 2 BTC at 100.00 USDT.',
+    );
+  });
+
+  it('announces a sell with the coin of the URL', () => {
+    search = 'coin=ETHUSDT';
+    renderPanel();
+    trade('Buy', '3');
+    document.querySelector('dialog')!.showModal();
+
+    trade('Sell', '1');
+
+    expect(screen.getByRole('status').textContent).toBe(
+      'Sold 1 ETH at 100.00 USDT.',
+    );
+  });
+
+  it('announces nothing for a rejected trade', () => {
+    renderPanel();
+
+    trade('Buy', '101');
+
+    expect(screen.getByRole('status').textContent).toBe('');
+  });
+
+  it('keeps the old result out of the way when a new trade is typed', () => {
+    renderPanel();
+    trade('Buy', '1');
+    document.querySelector('dialog')!.showModal();
+
+    fireEvent.change(screen.getByLabelText('Amount'), {
+      target: { value: '50' },
+    });
+
+    expect(screen.getByRole('status').textContent).toBe('');
+  });
+
+  it('does not announce price updates', () => {
+    const { rerender } = renderPanel();
+    priceState({ data: 105, isPending: false, isError: false });
+
+    rerender(<TradePanel />);
+
+    expect(screen.getByRole('status').textContent).toBe('');
+  });
+});
+
 describe('TradePanel', () => {
   it('shows the unit of the selected coin on the quantity field', () => {
     search = 'coin=ETHUSDT';

@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useRef, useState } from 'react';
+import { formatQty, formatUsdt } from '../lib/format';
 import { usePrice } from '../lib/market/queries';
 import { SYMBOLS } from '../lib/market/symbols';
 import { useSelectedSymbol } from '../lib/market/use-selected-symbol';
@@ -25,6 +26,8 @@ export function TradePanel() {
   const [qtyInput, setQtyInput] = useState('');
   const [amountInput, setAmountInput] = useState('');
   const [error, setError] = useState<string | null>(null);
+  // result of the last trade, announced by the live region below
+  const [result, setResult] = useState('');
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   const coin = symbol.replace(/USDT$/, '');
@@ -50,6 +53,9 @@ export function TradePanel() {
     setQtyInput('');
     setAmountInput('');
     setError(null);
+    setResult(
+      `${side === 'buy' ? 'Bought' : 'Sold'} ${formatQty(qty)} ${coin} at ${formatUsdt(price)}.`,
+    );
     // opening is declarative (command attributes), closing after a valid
     // trade depends on the validation result, so it needs this one call
     dialogRef.current?.close();
@@ -59,12 +65,14 @@ export function TradePanel() {
     setQtyInput(value);
     setAmountInput(price === undefined ? '' : qtyToAmount(value, price));
     setError(null);
+    setResult('');
   }
 
   function changeAmount(value: string) {
     setAmountInput(value);
     setQtyInput(price === undefined ? '' : amountToQty(value, price));
     setError(null);
+    setResult('');
   }
 
   return (
@@ -78,6 +86,13 @@ export function TradePanel() {
         </p>
       )}
       {price !== undefined && <p>Price: {price} USDT</p>}
+
+      {/* always rendered so screen readers pick up the change; sits outside
+          the dialog because that closes after a trade. Only trade results go
+          here, not price ticks. */}
+      <p role="status" aria-live="polite" className="muted">
+        {result}
+      </p>
 
       <button
         type="button"
