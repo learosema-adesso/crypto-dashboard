@@ -25,6 +25,34 @@ main {
   padding: var(--space-m);
 }
 
+/* Definition lists: label left, value right, thin dividers between rows */
+dl {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  margin: 0;
+}
+
+dt,
+dd {
+  margin: 0;
+  padding-block: var(--space-s);
+  border-block-end: var(--border);
+}
+
+dt {
+  color: var(--color-text-muted);
+}
+
+dd {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+dl > :nth-last-child(-n + 2) {
+  border-block-end: 0;
+}
+
 select,
 button {
   padding: var(--space-s) var(--space-m);
