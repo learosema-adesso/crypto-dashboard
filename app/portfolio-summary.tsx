@@ -1,33 +1,12 @@
 'use client';
 
-import { useQueries } from '@tanstack/react-query';
-import { useMemo } from 'react';
 import { formatUsdt } from '../lib/format';
-import { priceQuery } from '../lib/market/queries';
-import { computeHoldings } from '../lib/portfolio/holdings';
-import { computePortfolio } from '../lib/portfolio/portfolio';
+import { usePortfolio } from '../lib/portfolio/use-portfolio';
 import { useTrading } from '../lib/trading/store';
 
 export function PortfolioSummary() {
   const cash = useTrading((s) => s.cash);
-  const trades = useTrading((s) => s.trades);
-  // derived outside the selector, otherwise it returns a new object every time
-  const holdings = useMemo(() => computeHoldings(trades), [trades]);
-  const symbols = Object.keys(holdings);
-
-  const results = useQueries({ queries: symbols.map(priceQuery) });
-
-  const isError = results.some((r) => r.isError);
-  const isPending = results.some((r) => r.isPending);
-
-  // computePortfolio throws on a missing price, so only call it with all prices
-  let portfolio = null;
-  if (!isError && !isPending) {
-    const prices = Object.fromEntries(
-      symbols.map((symbol, i) => [symbol, results[i].data as number]),
-    );
-    portfolio = computePortfolio(holdings, prices);
-  }
+  const { portfolio, isPending, isError } = usePortfolio();
 
   return (
     <section className="card flow" aria-labelledby="portfolio-heading">
