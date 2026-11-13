@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Coding challenge: Crypto Trading Dashboard
 
-## Getting Started
+The app will allow users to view real-time crypto prices,
+analyze trends with charts, and simulate trades for popular cryptocurrencies like Bitcoin
+and Ethereum. Users can also view their portfolio summary with profit/loss calculations.
+Main Features
 
-First, run the development server:
+## 1. Crypto Price Chart
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Display a real-time price chart for a selected cryptocurrency (e.g., BTC or ETH).
+- Show price movements for the past 24 hours.
+- Use a line chart to plot the data.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 2. Mock Trading
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+-  Create a buy/sell interface where users can simulate trades for selected
+cryptocurrencies.
+- Update the user’s portfolio immediately after a trade (no backend required).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 3. Portfolio Overview
+- Display the user's current crypto holdings and transaction history.
+- Calculate and display profit/loss based on the latest prices.
 
-## Learn More
+Use the Figma specification as a reference for design implementation. While the provided
+design is for a mobile app, adapt the same style to create a responsive design suitable for
+desktop screens.
 
-To learn more about Next.js, take a look at the following resources:
+## Tech Requirements
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- React
+  - Build the app using React. Use modern React features such as hooks.
+- State Management
+  - Use Redux (or another state management library) to handle the app's data, such as
+    prices, trades, and portfolio information.
+- Charting
+  - Use a charting library like Recharts or Chart.js.
+- Data Source
+  - Use a free API like CoinGecko, CoinCap, or Binance API.
+- Error Handling
+  - Gracefully handle errors, such as when API calls fail or return invalid data.
+- Styling
+  - Use your preferred CSS framework or library (e.g., Tailwind CSS, Bootstrap, or plain
+    CSS).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Extra Points
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Testing
+a. Write unit tests for key components using a testing library such as Jest or
+React Testing Library.
+2. Performance Optimization
+a. Implement optimizations like debouncing the search input and lazy loading
+components.
+3. Real-Time Data Updates
+a. Fetch crypto prices periodically (e.g., every 10 seconds) to update the UI.
+Development Practices
+• Use Git for version control, and ensure meaningful commit messages.
+• Write clean, modular, and reusable code.
+• Keep it as simple as the nature of this problem allows it. Do not over-engineer.
