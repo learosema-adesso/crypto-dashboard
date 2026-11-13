@@ -8,6 +8,12 @@ vi.mock('../app/coin-chart', () => ({
 vi.mock('../app/portfolio-summary', () => ({
   PortfolioSummary: () => <p>portfolio summary</p>,
 }));
+vi.mock('../app/holdings-table', () => ({
+  HoldingsTable: () => <p>holdings table</p>,
+}));
+vi.mock('../app/transaction-history', () => ({
+  TransactionHistory: () => <p>transaction history</p>,
+}));
 vi.mock('../app/theme-switcher', () => ({
   ThemeSwitcher: () => <p>theme switcher</p>,
 }));
@@ -27,4 +33,6 @@ test('Page places the dashboard cards in an auto-grid', () => {
   expect(grid).not.toBeNull();
   expect(grid?.textContent).toContain('coin chart');
   expect(grid?.textContent).toContain('portfolio summary');
+  expect(grid?.textContent).toContain('holdings table');
+  expect(grid?.textContent).toContain('transaction history');
 });

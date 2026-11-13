@@ -1,7 +1,9 @@
 import { Suspense } from 'react';
 import { CoinChart } from './coin-chart';
+import { HoldingsTable } from './holdings-table';
 import { PortfolioSummary } from './portfolio-summary';
 import { ThemeSwitcher } from './theme-switcher';
+import { TransactionHistory } from './transaction-history';
 
 export default function Home() {
   return (
@@ -16,6 +18,8 @@ export default function Home() {
           <CoinChart />
         </Suspense>
         <PortfolioSummary />
+        <HoldingsTable />
+        <TransactionHistory />
       </div>
     </main>
   );

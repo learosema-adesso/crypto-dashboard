@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatUsdt } from './format';
+import { formatQty, formatUsdt } from './format';
 
 describe('formatUsdt', () => {
   it('formats with thousands separator and two decimals', () => {
@@ -18,5 +18,17 @@ describe('formatUsdt', () => {
 
   it('shows no sign for zero when signed', () => {
     expect(formatUsdt(0, { signed: true })).toBe('0.00 USDT');
+  });
+});
+
+describe('formatQty', () => {
+  it('keeps up to 8 decimals without padding', () => {
+    expect(formatQty(2)).toBe('2');
+    expect(formatQty(0.00123456)).toBe('0.00123456');
+  });
+
+  it('rounds beyond 8 decimals and groups thousands', () => {
+    expect(formatQty(0.123456789)).toBe('0.12345679');
+    expect(formatQty(1234.5)).toBe('1,234.5');
   });
 });

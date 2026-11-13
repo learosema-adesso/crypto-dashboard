@@ -7,3 +7,8 @@ export function formatUsdt(value: number, { signed = false } = {}): string {
   });
   return `${number} USDT`;
 }
+
+// Coin quantities need more precision than money (e.g. 0.00123456 BTC).
+export function formatQty(value: number): string {
+  return value.toLocaleString('en-US', { maximumFractionDigits: 8 });
+}
