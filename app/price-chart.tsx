@@ -58,7 +58,13 @@ export function PriceChart({ symbol }: { symbol: string }) {
               })
             }
           />
-          <YAxis domain={['auto', 'auto']} width={80} />
+          <YAxis
+            orientation="right"
+            domain={['auto', 'auto']}
+            width={80}
+            axisLine={false}
+            tickLine={false}
+          />
           <Area
             dataKey="price"
             dot={false}

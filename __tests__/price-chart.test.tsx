@@ -60,6 +60,27 @@ describe('PriceChart', () => {
     ).toBe(`url(#${gradient?.id})`);
   });
 
+  it('draws the price axis without axis and tick lines', async () => {
+    vi.mocked(fetchKlines).mockResolvedValue([
+      { time: 1_700_000_000_000, price: 100 },
+      { time: 1_700_000_900_000, price: 110 },
+    ]);
+
+    const { container } = renderWithClient(<PriceChart symbol="BTCUSDT" />);
+
+    await screen.findByRole('img', { name: 'BTCUSDT price, last 24 hours' });
+    // jsdom has no layout, so tick labels and the side of the axis can't be checked here
+    const yAxis = container.querySelector('.recharts-yAxis');
+    expect(yAxis).not.toBeNull();
+    expect(
+      yAxis?.querySelector('.recharts-cartesian-axis-tick'),
+    ).not.toBeNull();
+    expect(yAxis?.querySelector('.recharts-cartesian-axis-line')).toBeNull();
+    expect(
+      yAxis?.querySelector('.recharts-cartesian-axis-tick-line'),
+    ).toBeNull();
+  });
+
   it('shows a loading state while fetching', () => {
     vi.mocked(fetchKlines).mockReturnValue(new Promise(() => {}));
 
