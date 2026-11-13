@@ -10,7 +10,8 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { useKlines } from '../lib/market/queries';
+import type { PricePoint } from '../lib/market/mapping';
+import { useKlines, usePrice } from '../lib/market/queries';
 
 // Filled tag in the axis column, vertically centered on the last price.
 // Number only (the unit is in the header), so it fits the 80px axis.
@@ -53,8 +54,30 @@ function LastPriceTag({
   );
 }
 
+// The klines only change every 15 minutes. The live price (polled every 10 s,
+// same query as the header) becomes the last point of the line, so chart and
+// header show the same number. Without a live price (loading or failed) the
+// chart falls back to the klines alone.
+export function withLivePrice(
+  klines: PricePoint[],
+  price: number | undefined,
+  time: number,
+): PricePoint[] {
+  if (price === undefined || time <= klines[klines.length - 1].time) {
+    return klines;
+  }
+  return [...klines, { time, price }];
+}
+
 export function PriceChart({ symbol }: { symbol: string }) {
-  const { data, isPending, isError, error, refetch } = useKlines(symbol);
+  const {
+    data: klines,
+    isPending,
+    isError,
+    error,
+    refetch,
+  } = useKlines(symbol);
+  const { data: livePrice, dataUpdatedAt: livePriceTime } = usePrice(symbol);
   // useId can contain characters that are not safe inside url(#...)
   const gradientId = `price-fill-${useId().replace(/\W/g, '')}`;
 
@@ -77,6 +100,7 @@ export function PriceChart({ symbol }: { symbol: string }) {
     );
   }
 
+  const data = withLivePrice(klines, livePrice, livePriceTime);
   const last = data[data.length - 1];
 
   return (

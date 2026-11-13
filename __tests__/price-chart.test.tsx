@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { fetchKlines } from '../lib/market/api';
-import { PriceChart } from '../app/price-chart';
+import { fetchKlines, fetchPrice } from '../lib/market/api';
+import { PriceChart, withLivePrice } from '../app/price-chart';
 
 vi.mock('../lib/market/api');
 vi.mock('recharts', async (importOriginal) => {
@@ -239,5 +239,83 @@ describe('PriceChart', () => {
       'second failure',
     );
     expect(fetchKlines).toHaveBeenCalledTimes(2);
+  });
+
+  it('uses the live price as the last point, not the last kline close', async () => {
+    vi.mocked(fetchKlines).mockResolvedValue([
+      { time: 1_700_000_000_000, price: 100 },
+      { time: 1_700_000_900_000, price: 105 },
+    ]);
+    vi.mocked(fetchPrice).mockResolvedValue(123.45);
+
+    const { container } = renderWithClient(<PriceChart symbol="BTCUSDT" />);
+
+    await screen.findByRole('img', { name: 'BTCUSDT price, last 24 hours' });
+    await vi.waitFor(() =>
+      expect(container.querySelector('.last-price-tag')?.textContent).toBe(
+        '123.45',
+      ),
+    );
+    expect(fetchPrice).toHaveBeenCalledWith('BTCUSDT');
+  });
+
+  it('falls back to the last kline close while the live price is loading', async () => {
+    vi.mocked(fetchKlines).mockResolvedValue([
+      { time: 1_700_000_000_000, price: 100 },
+      { time: 1_700_000_900_000, price: 105 },
+    ]);
+    vi.mocked(fetchPrice).mockReturnValue(new Promise(() => {}));
+
+    const { container } = renderWithClient(<PriceChart symbol="BTCUSDT" />);
+
+    await screen.findByRole('img', { name: 'BTCUSDT price, last 24 hours' });
+    expect(container.querySelector('.last-price-tag')?.textContent).toBe(
+      '105.00',
+    );
+  });
+
+  it('still draws the chart from the klines when the live price fails', async () => {
+    vi.mocked(fetchKlines).mockResolvedValue([
+      { time: 1_700_000_000_000, price: 100 },
+      { time: 1_700_000_900_000, price: 105 },
+    ]);
+    vi.mocked(fetchPrice).mockRejectedValue(new Error('price down'));
+
+    const { container } = renderWithClient(<PriceChart symbol="BTCUSDT" />);
+
+    await screen.findByRole('img', { name: 'BTCUSDT price, last 24 hours' });
+    await vi.waitFor(() => expect(fetchPrice).toHaveBeenCalled());
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(container.querySelector('.last-price-tag')?.textContent).toBe(
+      '105.00',
+    );
+  });
+});
+
+describe('withLivePrice', () => {
+  const klines = [
+    { time: 1_000, price: 100 },
+    { time: 2_000, price: 105 },
+  ];
+
+  it('appends the live price as a new point', () => {
+    expect(withLivePrice(klines, 110, 3_000)).toEqual([
+      ...klines,
+      { time: 3_000, price: 110 },
+    ]);
+  });
+
+  it('does not mutate the klines', () => {
+    withLivePrice(klines, 110, 3_000);
+    expect(klines).toHaveLength(2);
+  });
+
+  it('returns the klines when there is no live price', () => {
+    expect(withLivePrice(klines, undefined, 0)).toBe(klines);
+  });
+
+  it('ignores a live price that is not newer than the last kline', () => {
+    expect(withLivePrice(klines, 110, 2_000)).toBe(klines);
+    expect(withLivePrice(klines, 110, 1_500)).toBe(klines);
   });
 });
